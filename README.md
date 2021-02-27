@@ -7,3 +7,10 @@ To run, `cd` to inside the `world-map` folder (but outside the `src` folder) in 
 ```shell
 bokeh serve --show world_map.py
 ```
+
+
+## To-do
+1. Fix color bar issue.
+2. Add options to change field of choropleth.
+3. Add rest of info to hover tooltip.
+4. Open up Wikipedia (?) page when country is clicked.
