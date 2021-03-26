@@ -13,3 +13,5 @@ bokeh serve --show world_map.py
 1. Add missing countries
 2. Change colorbar to ranges, instead of continuous
 3. Add an option to change choropleth color field
+4. Add rest of info to hover tooltip.
+5. Open up Wikipedia (?) page when country is clicked.
