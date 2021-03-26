@@ -18,7 +18,7 @@ from bokeh.palettes import Inferno as palette
 # needed again.
 ##################################################################
 
-FINAL_FILE = "final_dataset.csv"
+FINAL_FILE = "final_dataset"  # folder name for final shapefiles
 
 
 def get_geometry_coords(geo_object):

@@ -6,7 +6,7 @@ from bokeh.io import curdoc, output_file, show
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, GeoJSONDataSource, HoverTool, LogColorMapper, LogTicker, ColorBar, CheckboxGroup, FuncTickFormatter, FixedTicker, HoverTool, BoxZoomTool, ResetTool, ToolbarBox, Toolbar
 from bokeh.layouts import column
-from bokeh.palettes import Inferno, Cividis, Viridis8, Viridis6
+from bokeh.palettes import Inferno, Cividis, Viridis8, Viridis6, Viridis
 import numpy as np
 
 from create_dataframe import add_patch_coords
@@ -72,7 +72,7 @@ def patch_colors(df_countries):
 #################################################
 # Plot countries
 #################################################
-df_countries = gpd.read_file("src/final_dataset.shp")
+df_countries = gpd.read_file("final_dataset.shp")
 df_countries = add_patch_coords(df_countries)
 df_countries.drop(columns='geometry', inplace=True)
 df_countries['pop_densit'] = df_countries['pop_densit'] / 10000
@@ -80,33 +80,24 @@ df_countries['pop_densit'] = df_countries['pop_densit'] / 10000
 max_pop_density = df_countries.loc[df_countries['pop_densit']
                                    != np.inf, 'pop_densit'].squeeze().max()
 min_pop_density = df_countries['pop_densit'].min()
-# color_mapper = LogColorMapper(palette=list(reversed(Viridis[256])),
-#                              low=min_pop_density, high=max_pop_density)
+color_mapper = LogColorMapper(palette=list(reversed(Viridis[256])),
+                              low=min_pop_density, high=max_pop_density + 500)
 
-print(min_pop_density)
-print(max_pop_density)
-
-color_mapper = LogColorMapper(palette=list(
-    reversed(Viridis6)))
-
-ticker = FixedTicker(ticks=[1, 2, 10, 100, 1000, 100000])
-formatter = FuncTickFormatter(code="""
-    return 'test'
-""")
-
-plot = figure(plot_width=1200, plot_height=680,
+plot_width = 1300
+plot_height = int(plot_width / 1.7647)
+plot = figure(plot_width=plot_width, plot_height=plot_height,  # width / height = 1.7647
               title="Population density", toolbar_location='left')
-plot.axis.visible = False
+#plot.axis.visible = False
 countries_glyph = plot.multi_polygons("xs", "ys", source=df_countries[:239], line_color="black",
                                       fill_color={'field': 'pop_densit', 'transform': color_mapper})
 
+ticker = FixedTicker(
+    ticks=[1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000])
 
-color_bar = ColorBar(color_mapper=color_mapper, ticker=ticker, formatter=formatter,
-                     major_tick_out=0, major_tick_in=0, major_label_text_align='left',
-                     major_label_text_font_size='10pt', label_standoff=10)
+color_bar = ColorBar(color_mapper=color_mapper, location=(
+    0, 0), major_tick_line_color='black', ticker=ticker, label_standoff=10)
 
-
-plot.add_layout(color_bar)  # PROBLEM LINE
+plot.add_layout(color_bar, 'right')
 
 
 plot.add_tools(HoverTool(
@@ -116,7 +107,7 @@ plot.add_tools(HoverTool(
 #################################################
 # Plot capitals
 #################################################
-df_capitals = pd.read_csv("database/df_capitals.csv")
+df_capitals = pd.read_csv("../database/df_capitals.csv")
 
 capitals_glyph = plot.circle(x='CapitalLongitude', y='CapitalLatitude', source=df_capitals,
                              fill_color='red', line_color='red', size=4.5)
