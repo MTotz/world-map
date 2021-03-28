@@ -8,6 +8,8 @@ from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, GeoJSONDataSource, HoverTool, LogColorMapper, LogTicker, ColorBar
 from bokeh.layouts import column
 from bokeh.palettes import Inferno as palette
+from scrapy import Selector
+import requests
 
 ##################################################################
 # In this file we created the DataFrame that is to be used in the WorldMap.py
@@ -21,6 +23,26 @@ from bokeh.palettes import Inferno as palette
 FINAL_FILE = "final_dataset"  # folder name for final shapefiles
 
 
+def get_country_codes():
+    """
+    Scrapes each country's name and country code from https://countrycode.org/.
+    """
+
+    row_xpath = "//table/tbody//tr"
+    url = "https://countrycode.org/"
+    html = requests.get(url).content
+    sel = Selector(text=html)
+    names = sel.xpath("//table/tbody//tr/td[1]/a/text()").extract()
+    codes = sel.xpath("//table/tbody//tr/td[3]/text()").extract()
+    codes2 = [c[:2] for c in codes]  # keep only 3-letter code
+    codes3 = [c[-3:] for c in codes]  # keep only 3-letter code
+    col_labels = ["country_names", "ISO_2", "ISO_3"]
+    cols = [names, codes2, codes3]
+    df = pd.DataFrame(dict(zip(col_labels, cols)))
+
+    return df
+
+
 def get_geometry_coords(geo_object):
     """
     Finds the x and y coordinates of a geometry object and returns them as two lists in the
@@ -29,7 +51,7 @@ def get_geometry_coords(geo_object):
     Returns: A tuple containing the lists of the input object's x and y coordinates, respectively.
 
     Each list is in the form:
-    [[ [coordinates], [coordinates of hole 1], [coordinates of hole 2], [etc...] ]]
+    [[[coordinates], [coordinates of hole 1], [coordinates of hole 2], [etc...]]]
     """
 
     if geo_object is None:
@@ -95,7 +117,7 @@ def plot_data_set(dataset):
     This was used to figure out which parts of which data set I want to combine
     together by comparing them to each other.
 
-    Input: The number of the dataset you want to display (as the index in the array below).
+    Input: The number of the dataset you want to display(as the index in the array below).
     """
 
     #################################################
@@ -251,24 +273,5 @@ def create_polygon_dataset():
     return df
 
 
-#df = create_polygon_dataset()
-
-
-'''
-geodata0 = plot_data_set(0)
-geodata1 = plot_data_set(1)
-geodata2 = plot_data_set(2)
-
-
-
-
-data = gpd.read_file(FINAL_FILE)
-data = add_patch_coords(data)
-data.drop(columns='geometry', inplace=True)
-
-plot = figure(plot_width=1300, plot_height=680, title="Map")
-plot.multi_polygons('xs', 'ys', source=data[:239], line_color='black')
-
-show(plot)
-
-'''
+if __name__ == "__main__":
+    print(GeometryCollection())

@@ -86,7 +86,7 @@ color_mapper = LogColorMapper(palette=list(reversed(Viridis[256])),
 plot_width = 1300
 plot_height = int(plot_width / 1.7647)
 plot = figure(plot_width=plot_width, plot_height=plot_height,  # width / height = 1.7647
-              title="Population density", toolbar_location='left')
+              title="Population density (people/km squared", toolbar_location='left')
 #plot.axis.visible = False
 countries_glyph = plot.multi_polygons("xs", "ys", source=df_countries[:239], line_color="black",
                                       fill_color={'field': 'pop_densit', 'transform': color_mapper})
@@ -112,7 +112,6 @@ df_capitals = pd.read_csv("../database/df_capitals.csv")
 capitals_glyph = plot.circle(x='CapitalLongitude', y='CapitalLatitude', source=df_capitals,
                              fill_color='red', line_color='red', size=4.5)
 
-
 capitals_tooltips = """ 
     <div>
         <div>
@@ -120,6 +119,7 @@ capitals_tooltips = """
         </div>
     </div>
 """
+
 plot.add_tools(
     HoverTool(renderers=[capitals_glyph], tooltips=capitals_tooltips))
 
@@ -144,3 +144,5 @@ plot.background_fill_color = '#f0f0f0'
 
 layout = column(capitals_checkbox, plot)
 curdoc().add_root(layout)
+
+print(df_countries.iloc[317])
