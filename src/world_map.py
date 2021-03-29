@@ -72,21 +72,26 @@ def patch_colors(df_countries):
 #################################################
 # Plot countries
 #################################################
-df_countries = gpd.read_file("final_dataset.shp")
+df_countries = gpd.read_file("final_dataset/final_dataset.shp")
+#print("\n", 1, df_countries[df_countries["SOV_A3"] == "USA"])
 df_countries = add_patch_coords(df_countries)
+#print("\n", 2, df_countries[df_countries["SOV_A3"] == "USA"])
+
 df_countries.drop(columns='geometry', inplace=True)
-df_countries['pop_densit'] = df_countries['pop_densit'] / 10000
+#print("\n", 3, df_countries[df_countries["SOV_A3"] == "USA"])
+
+df_countries['pop_densit'] = df_countries['pop_densit']
 
 max_pop_density = df_countries.loc[df_countries['pop_densit']
                                    != np.inf, 'pop_densit'].squeeze().max()
 min_pop_density = df_countries['pop_densit'].min()
 color_mapper = LogColorMapper(palette=list(reversed(Viridis[256])),
-                              low=min_pop_density, high=max_pop_density + 500)
+                              low=min_pop_density, high=max_pop_density)
 
 plot_width = 1300
 plot_height = int(plot_width / 1.7647)
 plot = figure(plot_width=plot_width, plot_height=plot_height,  # width / height = 1.7647
-              title="Population density (people/km squared", toolbar_location='left')
+              title="Population density (people/km squared)", toolbar_location='left')
 #plot.axis.visible = False
 countries_glyph = plot.multi_polygons("xs", "ys", source=df_countries[:239], line_color="black",
                                       fill_color={'field': 'pop_densit', 'transform': color_mapper})
@@ -144,5 +149,3 @@ plot.background_fill_color = '#f0f0f0'
 
 layout = column(capitals_checkbox, plot)
 curdoc().add_root(layout)
-
-print(df_countries.iloc[317])

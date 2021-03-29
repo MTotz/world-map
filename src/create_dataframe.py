@@ -267,6 +267,7 @@ def add_population(df_final):
 def create_polygon_dataset():
     df = fix_polygons()
     df = add_population(df)
+
     df.to_file(FINAL_FILE)  # write the good polygons to a shapefile
     # column names get truncated here, but I don't know how to fix it
 
@@ -274,4 +275,7 @@ def create_polygon_dataset():
 
 
 if __name__ == "__main__":
-    print(GeometryCollection())
+    df = fix_polygons()
+    print("\n", 1, df[df["ISO_A3"] == "USA"])
+    df = add_population(df)
+    print("\n", 2, df[df["ISO_A3"] == "USA"])
