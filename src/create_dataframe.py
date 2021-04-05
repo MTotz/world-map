@@ -10,6 +10,7 @@ from bokeh.layouts import column
 from bokeh.palettes import Inferno as palette
 from scrapy import Selector
 import requests
+import numpy as np
 
 ##################################################################
 # In this file we created the DataFrame that is to be used in the WorldMap.py
@@ -117,7 +118,7 @@ def plot_data_set(dataset):
     This was used to figure out which parts of which data set I want to combine
     together by comparing them to each other.
 
-    Input: The number of the dataset you want to display(as the index in the array below).
+    Input: The number of the dataset you want to display (as the index in the array below).
     """
 
     #################################################
@@ -275,7 +276,41 @@ def create_polygon_dataset():
 
 
 if __name__ == "__main__":
+    '''
+    df0 = plot_data_set(0)
+    df1 = plot_data_set(1)
+    df2 = plot_data_set(2)
+'''
+
+    geodata_file0 = "../database/ne_50m_admin_0_countries.shp"
+    df0 = gpd.read_file(geodata_file0)
+    df_pop = pd.read_csv(
+        "../database/API_SP.POP.TOTL_DS2_en_csv_v2_1976634.csv", header=2)[['Country Name', 'Country Code', '2019']]
+
+    df_final = df0.merge(df_pop, how='outer',
+                         left_on='ISO_A3', right_on='Country Code')
+
+    df_copy = df_final['geometry'].apply(
+        lambda x: x if x else GeometryCollection())
+
+    df_copy = df_copy.to_crs({'proj': 'cea'})
+    df_final['pop_density'] = (df_final['2019'] / df_copy.area) * 10**6
+    # df_final.to_file("missing-countries.shp")
+    missing = df_final[df_final["pop_density"].isnull()]
+    codes = [x for x in df0["ISO_A3"].tolist()
+             if x not in df_pop['Country Code'].tolist()]
+
+    for index, row in df0.iterrows():
+        if row['ISO_A3'] in codes:
+            print(row["ISO_A3"], row["NAME_EN"])
+    # df_final.to_file("missing-countries")
+    # df0.plot()
+    # plt.show()
+
+'''
     df = fix_polygons()
-    print("\n", 1, df[df["ISO_A3"] == "USA"])
     df = add_population(df)
-    print("\n", 2, df[df["ISO_A3"] == "USA"])
+    df.plot()
+    plt.show()
+    print("\n", 2, df[df["Country Code"] == "FRA"])
+'''

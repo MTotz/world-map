@@ -72,42 +72,46 @@ def patch_colors(df_countries):
 #################################################
 # Plot countries
 #################################################
-df_countries = gpd.read_file("final_dataset/final_dataset.shp")
-#print("\n", 1, df_countries[df_countries["SOV_A3"] == "USA"])
+#df_countries = gpd.read_file("final_dataset/final_dataset.shp")
+df_countries = gpd.read_csv("database/df_merged.csv")
+print("here 1")
+exit
+
 df_countries = add_patch_coords(df_countries)
-#print("\n", 2, df_countries[df_countries["SOV_A3"] == "USA"])
+print("here 2")
+
+print(df_countries.columns)
 
 df_countries.drop(columns='geometry', inplace=True)
-#print("\n", 3, df_countries[df_countries["SOV_A3"] == "USA"])
 
-df_countries['pop_densit'] = df_countries['pop_densit']
-
-max_pop_density = df_countries.loc[df_countries['pop_densit']
-                                   != np.inf, 'pop_densit'].squeeze().max()
-min_pop_density = df_countries['pop_densit'].min()
+max_density = df_countries.loc[df_countries['PopDensity']
+                               != np.inf, 'PopDensity'].squeeze().max()
+min_density = df_countries['PopDensity'].min()
 color_mapper = LogColorMapper(palette=list(reversed(Viridis[256])),
-                              low=min_pop_density, high=max_pop_density)
+                              low=0.01, high=max_density)
+print(min_density, max_density)
 
 plot_width = 1300
 plot_height = int(plot_width / 1.7647)
 plot = figure(plot_width=plot_width, plot_height=plot_height,  # width / height = 1.7647
               title="Population density (people/km squared)", toolbar_location='left')
 #plot.axis.visible = False
-countries_glyph = plot.multi_polygons("xs", "ys", source=df_countries[:239], line_color="black",
-                                      fill_color={'field': 'pop_densit', 'transform': color_mapper})
-
+countries_glyph = plot.multi_polygons("xs", "ys", source=df_countries[:200], line_color="black",
+                                      fill_color={'field': 'PopDensity', 'transform': color_mapper})
+print("here 1")
 ticker = FixedTicker(
-    ticks=[1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000])
+    ticks=[0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 20000])
 
 color_bar = ColorBar(color_mapper=color_mapper, location=(
     0, 0), major_tick_line_color='black', ticker=ticker, label_standoff=10)
 
 plot.add_layout(color_bar, 'right')
-
+print("here 2")
 
 plot.add_tools(HoverTool(
-    renderers=[countries_glyph], tooltips='@{NAME_EN}', name='Hover (country)'))
+    renderers=[countries_glyph], tooltips=[('Country: ', '@{Country/Region}'), ('Languages', '@Languages')], name='Hover (country)'))
 
+print("here 3")
 
 #################################################
 # Plot capitals
